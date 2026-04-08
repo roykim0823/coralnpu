@@ -28,6 +28,21 @@ Coral NPU offers the following top-level feature set:
 * Python 3.9-3.12 (3.13 support is in progress)
 * [SRecord](https://srecord.sourceforge.net/)
 
+## Install Ubuntu 24.04
+```bash
+# install python
+$ uv python install 3.12
+# install bazel
+$ curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/bazel-archive-keyring.gpg > /dev/null
+$ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+
+$ sudo apt update && sudo apt install bazel-7.4.1
+
+# clang-19 version required to run mobilenet tutorial
+$ sudo apt-get install clang-19
+```
+
+
 ## Quick Start
 
 ```bash
