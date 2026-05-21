@@ -48,13 +48,17 @@
 
 #include "soc/interconnect/iconnect.h"
 #include "tests/verilator_sim/util.h"
-#define MODEL_HEADER_SUFFIX .h
-#define MODEL_HEADER STRINGIFY(VERILATOR_MODEL MODEL_HEADER_SUFFIX)
+// Note: the `.h` / `_parameters.h` suffixes must be lexically adjacent to
+// VERILATOR_MODEL inside STRINGIFY(...). Splitting them into a separate
+// macro causes the preprocessor's `#x` operator to insert a mandatory
+// space between adjacent tokens, producing e.g. "VCoreMiniAxi .h".
+#define MODEL_HEADER STRINGIFY(VERILATOR_MODEL.h)
 #include MODEL_HEADER
 
-#define PARAMS_HEADER_PREFIX hdl/chisel/src/coralnpu/
-#define PARAMS_HEADER_SUFFIX _parameters.h
-#define PARAMS_HEADER STRINGIFY(PARAMS_HEADER_PREFIX VERILATOR_MODEL PARAMS_HEADER_SUFFIX)
+#define PP_CAT_(a, b) a##b
+#define PP_CAT(a, b) PP_CAT_(a, b)
+#define PARAMS_HEADER \
+  STRINGIFY(hdl/chisel/src/coralnpu/PP_CAT(VERILATOR_MODEL, _parameters).h)
 #include PARAMS_HEADER
 
 struct CoreMiniAxi_tb : Sysc_tb {

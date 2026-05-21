@@ -28,6 +28,38 @@ Coral NPU offers the following top-level feature set:
 * Python 3.9-3.12 (3.13 support is in progress)
 * [SRecord](https://srecord.sourceforge.net/)
 
+## Setup
+
+Before running Bazel for the first time, pin the C/C++ compiler so Bazel's
+auto-generated `local_config_cc` toolchain picks up `clang` directly. If
+`ccache` is present on `PATH`, Bazel may otherwise generate a `cc_wrapper.sh`
+that invokes `/usr/bin/ccache` with no compiler argument, causing builds to
+fail with errors like `ccache: invalid option -- 'U'`.
+
+```bash
+export CC=/usr/bin/clang
+export CXX=/usr/bin/clang++
+unset BAZEL_CC
+```
+
+Add these to `~/.bashrc` (or the devcontainer setup) to persist them across
+shells.
+
+If you have already run Bazel and hit the `ccache` error, regenerate the
+toolchain after exporting the variables above:
+
+```bash
+bazel clean --expunge
+```
+
+You can verify the toolchain is correct by checking the last meaningful line
+of the generated wrapper — it should call `clang`, not `ccache`:
+
+```bash
+grep -A1 "Call the C++" "$(bazel info output_base)/external/local_config_cc/cc_wrapper.sh"
+# Expected: /usr/lib/llvm-19/bin/clang "$@"
+```
+
 ## Quick Start
 
 ```bash
@@ -42,7 +74,23 @@ bazel build //tests/verilator_sim:core_mini_axi_sim
 
 # Run the binary on the simulator:
 bazel-bin/tests/verilator_sim/core_mini_axi_sim --binary bazel-out/k8-fastbuild-ST-dd8dc713f32d/bin/examples/coralnpu_v2_hello_world_add_floats.elf
+
+# Run with an instruction trace printed to stdout:
+bazel-bin/tests/verilator_sim/core_mini_axi_sim \
+  --binary bazel-out/k8-fastbuild-ST-dd8dc713f32d/bin/examples/coralnpu_v2_hello_world_add_floats.elf \
+  --instr_trace
+
+# Run and dump a VCD waveform (open in GTKWave / Surfer):
+bazel-bin/tests/verilator_sim/core_mini_axi_sim \
+  --binary bazel-out/k8-fastbuild-ST-dd8dc713f32d/bin/examples/coralnpu_v2_hello_world_add_floats.elf \
+  --trace
 ```
+
+Note: the `hello_world_add_floats` example is a silent computation (no `printf`),
+so a plain run exits with only SystemC's `Simulation stopped by user.` banner.
+That message just means the testbench called `sc_stop()` after detecting program
+completion — it does not indicate an error. Use `--instr_trace` or `--trace`
+above to observe execution.
 
 
 ![](doc/images/Coral_Logo_200px-2x.png)
