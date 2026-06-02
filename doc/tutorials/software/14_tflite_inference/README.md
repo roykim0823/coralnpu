@@ -1,6 +1,19 @@
-# NPUSim MobileNet Tutorial
+# 14. TFLite-Micro inference on NPUSim — MobileNet v1
 
-This tutorial explains the plumbing and mechanics of how `npusim_run_mobilenet.py` executes and interacts with the compiled C++ binary `run_full_mobilenet_v1.cc` using the CoralNPU Python simulator bindings.
+> Part of the [CoralNPU tutorial series](../../README.md) · *Software path.*
+> Was previously `doc/tutorials/npusim_mobilenet_tutorial.md`.
+
+**Goal.** Run a full int8 MobileNet v1 inference on the NPUSim Python
+simulator, and understand the host/device "plumbing" — how Python writes
+inputs into the device's memory by ELF symbol name, runs the simulator, and
+reads results back.
+
+**Prereqs.** [`00_setup`](../../00_setup/README.md),
+[`01_hello_world`](../../01_hello_world/README.md), and ideally
+[`10_program_anatomy`](../10_program_anatomy/README.md) (you'll recognize the
+`.data`-section-by-name pattern).
+
+This tutorial explains the plumbing and mechanics of how `tests/npusim_examples/npusim_run_mobilenet.py` executes and interacts with the compiled C++ binary `tests/npusim_examples/run_full_mobilenet_v1.cc` using the CoralNPU Python simulator bindings.
 
 ## Overview
 
@@ -95,3 +108,17 @@ bazel run tests/npusim_examples:npusim_run_mobilenet
 3. **Write**: Python writes mock input data into the `inference_input` address pointer.
 4. **Run**: Python invokes the simulator. The C++ code copies `inference_input` to the model, calculates, and copies results to `inference_output`.
 5. **Read**: Simulation finishes. Python reaches into the `inference_output` address pointer to verify the results.
+
+## Source references
+- [`tests/npusim_examples/run_full_mobilenet_v1.cc`](../../../../tests/npusim_examples/run_full_mobilenet_v1.cc) — the device-side inference binary.
+- [`tests/npusim_examples/npusim_run_mobilenet.py`](../../../../tests/npusim_examples/npusim_run_mobilenet.py) — the host-side runner.
+- [`sw/coralnpu_sim/coralnpu_v2_sim_utils.py`](../../../../sw/coralnpu_sim/coralnpu_v2_sim_utils.py) — the `CoralNPUV2Simulator` Python class.
+- [`sw/coralnpu_sim/coralnpu_v2_sim_pybind.cc`](../../../../sw/coralnpu_sim/coralnpu_v2_sim_pybind.cc) — the pybind11 bridge to the C++ simulator.
+- [`sw/opt/litert-micro/`](../../../../sw/opt/litert-micro/) — the RVV-optimized TFLite-Micro op kernels (`conv`, `depthwise_conv`, etc.) that this binary registers.
+
+## Next
+- [`12_rvv_intrinsics`](../12_rvv_intrinsics/README.md) — write your own
+  vector kernel; understand the building blocks the optimized TFLite-Micro
+  ops use under the hood.
+- [`02_simulator_landscape`](../../02_simulator_landscape/README.md) — when to
+  reach for NPUSim vs the RTL simulators.

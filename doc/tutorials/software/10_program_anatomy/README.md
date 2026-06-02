@@ -1,18 +1,24 @@
-# Writing a CoralNPU Program
+# 10. Program anatomy — writing a CoralNPU program and a cocotb test
 
-This tutorial introduces the basics of writing a CoralNPU program. You will:
+> Part of the [CoralNPU tutorial series](../../README.md) · *Software path.*
+> Was previously `doc/tutorials/writing_coralnpu_programs.md`.
 
-1) Learn the basic structure of a CoralNPU program.
-2) Write and compile a basic program.
-3) Test your program with a cocotb test bench.
+**Goal.** Write and compile a small CoralNPU program, then drive it from a
+cocotb testbench: load the ELF, write inputs into DTCM, start the core, and
+read results back.
 
-## Prerequistes
+**Prereqs.** [`00_setup`](../../00_setup/README.md), [`01_hello_world`](../../01_hello_world/README.md).
+This tutorial also assumes you have completed the OpenSecura [getting started guide](https://opensecura.googlesource.com/docs/+/refs/heads/master/GettingStarted.md).
 
-This tutorial assumes you have completed opensecura [getting started guide](https://opensecura.googlesource.com/docs/+/refs/heads/master/GettingStarted.md).
+## What you'll learn
+1. The basic structure of a CoralNPU program (input/output buffers in `.data`).
+2. How to compile a program with `coralnpu_v2_binary`.
+3. How to write a cocotb testbench that loads the ELF, injects inputs, runs
+   the core, and reads outputs.
 
 ## Writing a basic CoralNPU program
 
-Open up [`tests/cocotb/tutorial/program.cc`](../../tests/cocotb/tutorial/program.cc),
+Open up [`tests/cocotb/tutorial/program.cc`](../../../../tests/cocotb/tutorial/program.cc),
 which is a skeleton program:
 
 ```c++
@@ -87,7 +93,7 @@ to generate `coralnpu_v2_program.elf`.
 
 ## Creating the test bench
 
-Open up [`tests/cocotb/tutorial/tutorial.py`](../../tests/cocotb/tutorial/tutorial.py)
+Open up [`tests/cocotb/tutorial/tutorial.py`](../../../../tests/cocotb/tutorial/tutorial.py)
 which contains the skeleton testbench:
 
 ```python
@@ -231,7 +237,14 @@ I got [8994 8995 8996 8997 8998 8999 9000 9001]
 
 Congratulations on running your first program!
 
-## Next steps
+## Source references
+- [`tests/cocotb/tutorial/program.cc`](../../../../tests/cocotb/tutorial/program.cc) — the program skeleton.
+- [`tests/cocotb/tutorial/tutorial.py`](../../../../tests/cocotb/tutorial/tutorial.py) — the testbench skeleton.
+- [`coralnpu_test_utils/core_mini_axi_interface.py`](../../../../coralnpu_test_utils/core_mini_axi_interface.py) — the cocotb AXI driver behind `CoreMiniAxiInterface` (`load_elf`, `lookup_symbol`, `read`/`write`, `execute_from`, `wait_for_halted`).
+- [`rules/coralnpu_v2.bzl`](../../../../rules/coralnpu_v2.bzl) — the `coralnpu_v2_binary` Bazel macro.
 
-Follow up tutorials will cover accelerating CoralNPU with RISC-V Vector
-intrinsics.
+## Next
+- [`12_rvv_intrinsics`](../12_rvv_intrinsics/README.md) — accelerate this kind
+  of program with RISC-V Vector intrinsics.
+- [`14_tflite_inference`](../14_tflite_inference/README.md) — run a full
+  TFLite-Micro model through the same pattern, but in NPUSim.

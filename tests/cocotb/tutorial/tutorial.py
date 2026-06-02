@@ -14,9 +14,10 @@
 
 import cocotb
 import numpy as np
-
 from bazel_tools.tools.python.runfiles import runfiles
+
 from coralnpu_test_utils.core_mini_axi_interface import CoreMiniAxiInterface
+
 
 @cocotb.test()
 async def core_mini_axi_tutorial(dut):
@@ -28,9 +29,24 @@ async def core_mini_axi_tutorial(dut):
     cocotb.start_soon(core_mini_axi.clock.start())
 
     # TODO: Load your program into ITCM with "load_elf"
+    r = runfiles.Create()
+    elf_path = r.Rlocation("coralnpu_hw/tests/cocotb/tutorial/coralnpu_v2_program.elf")
+    with open(elf_path, "rb") as f:
+        entry_point = await core_mini_axi.load_elf(f)
+        input1_addr = core_mini_axi.lookup_symbol(f, "input1_buffer")
+        input2_addr = core_mini_axi.lookup_symbol(f, "input2_buffer")
+        output_addr = core_mini_axi.lookup_symbol(f, "output_buffer")
 
     # TODO: Write your program inputs
+    input1_data = np.arange(8, dtype=np.uint32)
+    input2_data = 8994 * np.ones(8, dtype=np.uint32)
+    await core_mini_axi.write(input1_addr, input1_data)
+    await core_mini_axi.write(input2_addr, input2_data)
 
     # TODO: Run your program and wait for halted
+    await core_mini_axi.execute_from(entry_point)
+    await core_mini_axi.wait_for_halted()
 
     # TODO: Read your program outputs and print the result
+    rdata = (await core_mini_axi.read(output_addr, 4 * 8)).view(np.uint32)
+    print(f"I got {rdata}")

@@ -9,6 +9,9 @@ Coral NPU includes three distinct processor components that work together: matri
 ![Coral NPU Archicture](doc/images/arch_data_flow.png)
 [Coral NPU Architecture Datasheet](https://developers.google.com/coral/guides/hardware/datasheet)
 
+New to the codebase? See [doc/repository_guide.md](doc/repository_guide.md) for a
+directory-by-directory tour of the repository.
+
 ## Coral NPU Features
 Coral NPU offers the following top-level feature set:
 
